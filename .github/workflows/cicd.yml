@@ -35,6 +35,13 @@ jobs:
           fi
         working-directory: backend
 
+      - name: Install ESLint
+        run: npm install -g eslint
+
+      - name: Run ESLint
+        run: npx eslint .
+        working-directory: backend
+
       - name: Run backend tests
         run: |
           npm test | tee test-results.log
@@ -74,13 +81,6 @@ jobs:
               -d "{\"content\": \"*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-      - name: Install ESLint
-        run: npm install -g eslint
-
-      - name: Run ESLint
-        run: npx eslint .
-        working-directory: backend
-
       - name: Trigger backend deploy on Render
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
@@ -117,6 +117,13 @@ jobs:
           fi
         working-directory: frontend
 
+      - name: Install ESLint
+        run: npm install -g eslint
+
+      - name: Run ESLint
+        run: npx eslint .
+        working-directory: frontend
+
       - name: Serve frontend for testing # Start a local server and check if it's running
         run: |
           node server.js &
@@ -125,10 +132,10 @@ jobs:
         working-directory: frontend
 
       - name: Calculate job duration
-        run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV
+        run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV # Calculate how long the job took
 
       - name: Notify Slack (Frontend)
-        if: always()
+        if: always() # Always send Slack message
         uses: slackapi/slack-github-action@v1.25.0
         with:
           payload: |
@@ -150,17 +157,10 @@ jobs:
               -X POST \
               -d "{\"content\": \"*Job:* Frontend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
-              
-      - name: Install ESLint
-        run: npm install -g eslint
-
-      - name: Run ESLint
-        run: npx eslint .
-        working-directory: frontend
 
       - name: Mock Deploy Frontend (Vercel)
         run: echo "Frontend automatically deployed by Vercel"
 
       - name: Echo job completion
         if: success()
-        run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!"
+        run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!" # Echo final success message for the job
