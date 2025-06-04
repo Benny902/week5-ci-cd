@@ -111,17 +111,17 @@ we can download an artifact zip file from the link above, and see it has 'test-r
 ```yaml
       - name: Notify Slack (Backend)
         if: always() # always run this step even if tests fail
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@v1.25.0 # Use official Slack GitHub Action
         with:
           payload: |
             {
               "text": "*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # Slack webhook URL stored in GitHub secrets
 
-      - name: Notify Discord (Backend)
-        if: always()
+      - name: Notify Discord (Backend) # here we use a different method, we use POST to the DISCORD_WEBHOOK_URL, because there is no official GitHub Action for Discord
+        if: always() # always run this step even if tests fail
         run: |
           STATUS="Failed"
           if [ "${{ job.status }}" == "success" ]; then
