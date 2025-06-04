@@ -195,8 +195,10 @@ both render and vercel deploy automatically, but we wanted to show the differenc
 
 
 ## Combined Frontend and Backend CI/CD (`Full cicd.yml` file):
-1. created simple backend and frontend folder and files
-2. enhanced the yml, this is the final yml file:
+
+<details>
+<summary> Created simple backend and frontend folder and files and enhanced the yml, this is the final yml file: </summary>
+
 ```yaml
 name: Microblog CI
 
@@ -368,6 +370,10 @@ jobs:
         run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!" # Echo final success message for the job
 ```
 
+</details>
+
+
+<br><hr><br>
 
 # REFLECTION.MD
 
