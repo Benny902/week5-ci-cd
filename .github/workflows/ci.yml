@@ -80,6 +80,9 @@ jobs:
         run: npx eslint .
         working-directory: backend
 
+      - name: Trigger backend deploy on Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
       - name: Echo job completion
         if: success()
         run: echo "Backend job for Node.js ${{ matrix.node-version }} completed successfully!"
@@ -153,6 +156,9 @@ jobs:
       - name: Run ESLint
         run: npx eslint .
         working-directory: frontend
+
+      - name: Mock Deploy Frontend (Vercel)
+        run: echo "Frontend automatically deployed by Vercel"
 
       - name: Echo job completion
         if: success()
