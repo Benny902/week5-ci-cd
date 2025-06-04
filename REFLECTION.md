@@ -25,4 +25,4 @@ which means if the node is under 18 it will use `npm install` and if its 18 or h
 - npm ci strictly installs from package-lock.json, is faster, and ensures a clean, reproducible install — ideal for CI pipelines.
 
 ## Improvements:
-For a production pipeline, we’d add test coverage thresholds, split deploys for staging and production, and include security scans. Reusable workflows would also help reduce duplication and improve maintainability.
+For production, we’d add test coverage checks, separate deploys for staging and production, and include security scans. We’d also clean up repeated code by using reusable workflows.
