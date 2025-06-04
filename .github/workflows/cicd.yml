@@ -1,4 +1,4 @@
-name: Microblog CI
+name: Microblog CICD
 
 on:
   push: # Runs on every push
