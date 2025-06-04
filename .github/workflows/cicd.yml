@@ -82,6 +82,7 @@ jobs:
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Trigger backend deploy on Render
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
       - name: Echo job completion
@@ -159,6 +160,7 @@ jobs:
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Mock Deploy Frontend (Vercel)
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: echo "Frontend automatically deployed by Vercel"
 
       - name: Echo job completion
