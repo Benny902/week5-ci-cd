@@ -1,27 +1,28 @@
 name: Microblog CI
 
-on: # Runs on every push and pull request
-  push:
-  pull_request:
+on:
+  push: # Runs on every push
+  pull_request: # Runs on pull request
+  workflow_dispatch: # Can be run manually
 
 jobs:
 
   backend:
     runs-on: ubuntu-latest
     strategy:
-      matrix: # Defines a matrix for versions
+      matrix: # Matrix strategy to test multiple Node.js versions
         node-version: [16, 18, 20]
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Set job start time
-        run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV
+        run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV # Record the start time in seconds and store it in GitHub Actions environment variable
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }} # Use the Node.js version from the matrix
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -47,21 +48,21 @@ jobs:
           path: backend/test-results.log
 
       - name: Calculate job duration
-        run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV
+        run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV # Calculate duration in seconds and store in environment variable
 
       - name: Notify Slack (Backend)
         if: always() # always run this step even if tests fail
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@v1.25.0 # Use official Slack GitHub Action
         with:
           payload: |
             {
               "text": "*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # Slack webhook URL stored in GitHub secrets
 
-      - name: Notify Discord
-        if: always()
+      - name: Notify Discord (Backend) # here we use a different method, we use POST to the DISCORD_WEBHOOK_URL, because there is no official GitHub Action for Discord
+        if: always() # always run this step even if tests fail
         run: |
           STATUS="Failed"
           if [ "${{ job.status }}" == "success" ]; then
@@ -84,8 +85,8 @@ jobs:
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
       - name: Echo job completion
-        if: success()
-        run: echo "Backend job for Node.js ${{ matrix.node-version }} completed successfully!"
+        if: success() # Only run if job was successful
+        run: echo "Backend job for Node.js ${{ matrix.node-version }} completed successfully!" # Bash echo to log success message
 
 
   frontend:
@@ -98,12 +99,12 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set job start time
-        run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV
+        run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV # Record the job start time
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }} # Use matrix version
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -116,7 +117,7 @@ jobs:
           fi
         working-directory: frontend
 
-      - name: Serve frontend for testing # Adds a final step to validate service availability
+      - name: Serve frontend for testing # Start a local server and check if it's running
         run: |
           node server.js &
           sleep 3
