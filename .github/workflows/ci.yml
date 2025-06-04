@@ -18,15 +18,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+          cache-dependency-path: week5/week5_practice/ci-practice/package-lock.json
       - name: Install backend dependencies
-        run: |
-          cd backend
-          npm install
+        run: npm ci
+        working-directory: backend
       - name: Run backend tests
         run: |
-          cd backend
           npm test | tee test-results.log
           echo "Build finished successfully at $(date)" >> test-results.log
+        working-directory: backend
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
@@ -74,15 +75,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm install
+        run: npm ci
+        working-directory: frontend
       - name: Serve frontend for testing # Adds a final step to validate service availability
         run: |
-          cd frontend
           node server.js &
           sleep 3
           curl -I http://localhost:4000
+        working-directory: frontend
       - name: Calculate job duration
         run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV
       - name: Notify Slack (Frontend)
