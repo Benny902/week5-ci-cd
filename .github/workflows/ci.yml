@@ -5,36 +5,50 @@ on: # Runs on every push and pull request
   pull_request:
 
 jobs:
+
   backend:
     runs-on: ubuntu-latest
     strategy:
       matrix: # Defines a matrix for versions
         node-version: [14, 16, 18]
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Set job start time
         run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
+
       - name: Install backend dependencies
-        run: npm ci
+        run: |
+          if [ "${{ matrix.node-version }}" = "14" ] || [ "${{ matrix.node-version }}" = "16" ]; then
+            npm install
+          else
+            npm ci
+          fi
         working-directory: backend
+
       - name: Run backend tests
         run: |
           npm test | tee test-results.log
           echo "Build finished successfully at $(date)" >> test-results.log
         working-directory: backend
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results-node${{ matrix.node-version }}
           path: backend/test-results.log
+
       - name: Calculate job duration
         run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV
+
       - name: Notify Slack (Backend)
         if: always() # always run this step even if tests fail
         uses: slackapi/slack-github-action@v1.25.0
@@ -45,6 +59,7 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Notify Discord
         if: always()
         run: |
@@ -57,36 +72,50 @@ jobs:
               -X POST \
               -d "{\"content\": \"*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
       - name: Echo job completion
         if: success()
         run: echo "Backend job for Node.js ${{ matrix.node-version }} completed successfully!"
+
 
   frontend:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14, 16, 18]
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Set job start time
         run: echo "JOB_START_TIME=$(date +%s)" >> $GITHUB_ENV
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
       - name: Install frontend dependencies
-        run: npm ci
+        run: |
+          if [ "${{ matrix.node-version }}" = "14" ] || [ "${{ matrix.node-version }}" = "16" ]; then
+            npm install
+          else
+            npm ci
+          fi
         working-directory: frontend
+
       - name: Serve frontend for testing # Adds a final step to validate service availability
         run: |
           node server.js &
           sleep 3
           curl -I http://localhost:4000
         working-directory: frontend
+
       - name: Calculate job duration
         run: echo "JOB_DURATION=$(( $(date +%s) - $JOB_START_TIME ))" >> $GITHUB_ENV
+
       - name: Notify Slack (Frontend)
         if: always()
         uses: slackapi/slack-github-action@v1.25.0
@@ -97,6 +126,7 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Notify Discord
         if: always()
         run: |
@@ -109,6 +139,7 @@ jobs:
               -X POST \
               -d "{\"content\": \"*Job:* Frontend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
+              
       - name: Echo job completion
         if: success()
         run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!"
