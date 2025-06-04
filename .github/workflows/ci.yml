@@ -73,6 +73,12 @@ jobs:
               -d "{\"content\": \"*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
+      - name: Lint + Format backend
+        run: |
+          npx eslint . --no-eslintrc --config eslint.config.mjs --fix
+          npx prettier . --check
+        working-directory: backend
+
       - name: Echo job completion
         if: success()
         run: echo "Backend job for Node.js ${{ matrix.node-version }} completed successfully!"
@@ -140,6 +146,12 @@ jobs:
               -d "{\"content\": \"*Job:* Frontend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
               
+      - name: Lint + Format frontend
+        run: |
+          npx eslint . --no-eslintrc --config eslint.config.mjs --fix
+          npx prettier . --check
+        working-directory: backend
+
       - name: Echo job completion
         if: success()
         run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!"
