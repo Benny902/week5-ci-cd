@@ -107,6 +107,6 @@ jobs:
               -X POST \
               -d "{\"content\": \"*Job:* Frontend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
-        - name: Echo job completion
+      - name: Echo job completion
         if: success()
         run: echo "Frontend job for Node.js ${{ matrix.node-version }} completed successfully!"
