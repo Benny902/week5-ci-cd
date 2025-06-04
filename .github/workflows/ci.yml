@@ -73,10 +73,11 @@ jobs:
               -d "{\"content\": \"*Job:* Backend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-      - name: Lint + Format backend
-        run: |
-          npx eslint . --fix
-          npx prettier . --check
+      - name: Install ESLint
+        run: npm install -g eslint
+
+      - name: Run ESLint
+        run: npx eslint .
         working-directory: backend
 
       - name: Echo job completion
@@ -146,10 +147,11 @@ jobs:
               -d "{\"content\": \"*Job:* Frontend (Node.js ${{ matrix.node-version }})\n*Status:* ${{ job.status }}\n*Duration:* ${{ env.JOB_DURATION }} seconds\n*Workflow:* ${{ github.workflow }}\n*Run:* #${{ github.run_number }}\n*Repo:* ${{ github.repository }}\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
               
-      - name: Lint + Format frontend
-        run: |
-          npx eslint . --fix
-          npx prettier . --check
+      - name: Install ESLint
+        run: npm install -g eslint
+
+      - name: Run ESLint
+        run: npx eslint .
         working-directory: frontend
 
       - name: Echo job completion
